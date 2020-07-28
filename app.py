@@ -1,4 +1,5 @@
 import numpy as np
+import datetime as dt
 
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
@@ -34,9 +35,9 @@ def welcome():
         f"Available Routes:<br/>"
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
-        f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/<start><br/>"
-        f"/api/v1.0/<start>/<end>"
+        f"/api/v1.0/temperature<br/>"
+        f"/api/v1.0/temperature/start-date/YYYY-MM-DD<br/>"
+        f"/api/v1.0/temperature/start-date/YYYY-MM-DD/end-date/YYYY-MM-DD"
     )
 
 #####################################################################################
@@ -69,7 +70,7 @@ def stations():
     session = Session(engine)
 
     # Query all stations
-    results = session.query(Measurement.station).distinct().all()
+    results = session.query(Station.station).distinct().all()
 
     session.close()
 
@@ -81,8 +82,8 @@ def stations():
 
 #####################################################################################
 
-@app.route("/api/v1.0/tobs")
-def tobs():
+@app.route("/api/v1.0/temperature")
+def temperature():
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
@@ -93,9 +94,10 @@ def tobs():
 
     one_year_ago = latest_date_converted - dt.timedelta(days=366)
 
-    count_per_station = session.query(Measurement.station, func.count(Measurement.station)).\
-                        group_by(Measurement.station).\
-                        order_by(func.count(Measurement.station).desc()).all()
+    count_per_station = session.query(Station.station, Station.name, func.count(Measurement.station)).\
+                            filter(Station.station == Measurement.station).\
+                            group_by(Station.station, Station.name).\
+                            order_by(func.count(Measurement.station).desc()).all()
 
     highest_station = count_per_station[0][0]
 
@@ -112,27 +114,38 @@ def tobs():
 
 #####################################################################################
 
-@app.route("/api/v1.0/<start>")
-def start():
+@app.route("/api/v1.0/temperature/start-date/<start>")
+def temp_by_startdate(start):
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
     # Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
-    
-
-
     # When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than and equal to the start date.
+    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+                filter(Measurement.date >= start).all()
 
+    session.close()
+
+    temp_list = list(np.ravel(results))
+
+    return jsonify(temp_list)
 #####################################################################################
 
-@app.route("/api/v1.0/<start>/<end>")
-def start_end():
+@app.route("/api/v1.0/temperature/start-date/<start>/end-date/<end>")
+def temp_by_startend(start, end):
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
     # Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
-
     # When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive.
+    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+                filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+
+    session.close()
+
+    temp_list = list(np.ravel(results))
+
+    return jsonify(temp_list)
 
 
 if __name__ == '__main__':
