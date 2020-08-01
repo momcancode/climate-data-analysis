@@ -35,9 +35,9 @@ def welcome():
         f"Available Routes:<br/>"
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
-        f"/api/v1.0/temperature<br/>"
-        f"/api/v1.0/temperature/start-date/YYYY-MM-DD<br/>"
-        f"/api/v1.0/temperature/start-date/YYYY-MM-DD/end-date/YYYY-MM-DD"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/tobs/YYYY-MM-DD<br/>"
+        f"/api/v1.0/tobs/YYYY-MM-DD/YYYY-MM-DD"
     )
 
 #####################################################################################
@@ -82,7 +82,7 @@ def stations():
 
 #####################################################################################
 
-@app.route("/api/v1.0/temperature")
+@app.route("/api/v1.0/tobs")
 def temperature():
     # Create our session (link) from Python to the DB
     session = Session(engine)
@@ -114,7 +114,7 @@ def temperature():
 
 #####################################################################################
 
-@app.route("/api/v1.0/temperature/start-date/<start>")
+@app.route("/api/v1.0/<start>")
 def temp_by_startdate(start):
     # Create our session (link) from Python to the DB
     session = Session(engine)
@@ -131,7 +131,7 @@ def temp_by_startdate(start):
     return jsonify(temp_list)
 #####################################################################################
 
-@app.route("/api/v1.0/temperature/start-date/<start>/end-date/<end>")
+@app.route("/api/v1.0/<start>/<end>")
 def temp_by_startend(start, end):
     # Create our session (link) from Python to the DB
     session = Session(engine)
