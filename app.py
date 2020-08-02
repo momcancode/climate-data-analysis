@@ -92,7 +92,7 @@ def temperature():
 
     latest_date_converted = dt.datetime.strptime(latest_date[0], "%Y-%m-%d")
 
-    one_year_ago = latest_date_converted - dt.timedelta(days=366)
+    one_year_ago = latest_date_converted - dt.timedelta(days=365)
 
     count_per_station = session.query(Station.station, Station.name, func.count(Measurement.station)).\
                             filter(Station.station == Measurement.station).\
