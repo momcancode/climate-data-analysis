@@ -98,8 +98,8 @@ Design a Flask API based on the queries developed.
 
 * Use Pandas to plot an area plot for the daily normals.
 
+---
+Contact:
 
-### Copyright
-
-Trilogy Education Services © 2020. All Rights Reserved.
+Email: thao.ph.ha@gmail.com
 
